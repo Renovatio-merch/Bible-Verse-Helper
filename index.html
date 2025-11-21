@@ -1,0 +1,80 @@
+<!doctype html>
+{ref: 'Psalm 34:18', text: 'The LORD is nigh unto them that are of a broken heart...'}
+],
+temptation: [
+{ref: '1 Corinthians 10:13', text: 'There hath no temptation taken you but such as is common to man: but God is faithful... he will with the temptation also make a way to escape, that ye may be able to bear it.'},
+{ref: 'James 1:12–15', text: 'Blessed is the man that endureth temptation... But every man is tempted, when he is drawn away of his own lust...'},
+{ref: 'Matthew 26:41', text: 'Watch and pray, that ye enter not into temptation: for the spirit indeed is willing, but the flesh is weak.'}
+],
+anger: [
+{ref: 'Ephesians 4:26–27', text: 'Be ye angry, and sin not: let not the sun go down upon your wrath, Neither give place to the devil.'},
+{ref: 'Proverbs 15:1', text: 'A soft answer turneth away wrath: but grievous words stir up anger.'},
+{ref: 'James 1:19–20', text: 'Wherefore, my beloved brethren, let every man be swift to hear, slow to speak, slow to wrath...'}
+],
+doubt: [
+{ref: 'James 1:5–6', text: 'If any of you lack wisdom, let him ask of God... But let him ask in faith, nothing wavering.'},
+{ref: 'Mark 9:24', text: 'And straightway the father of the child cried out, and said with tears, Lord, I believe; help thou mine unbelief.'},
+{ref: 'Hebrews 11:1', text: 'Now faith is the substance of things hoped for, the evidence of things not seen.'}
+]
+};
+
+
+const resultsEl = document.getElementById('results');
+const feelingEl = document.getElementById('feeling');
+const generateBtn = document.getElementById('generate');
+const randomBtn = document.getElementById('random');
+const copyBtn = document.getElementById('copy');
+const downloadBtn = document.getElementById('download');
+
+
+function renderVerses(list){
+resultsEl.innerHTML = '';
+list.forEach(v => {
+const card = document.createElement('div'); card.className='verse';
+const ref = document.createElement('div'); ref.className='ref'; ref.textContent = v.ref;
+const txt = document.createElement('div'); txt.className='text'; txt.textContent = v.text;
+const actions = document.createElement('div'); actions.className='actions small';
+const cbtn = document.createElement('button'); cbtn.className='pill'; cbtn.textContent='Copy';
+cbtn.addEventListener('click', ()=> navigator.clipboard.writeText(v.ref + '\n' + v.text));
+actions.appendChild(cbtn);
+card.appendChild(ref); card.appendChild(txt); card.appendChild(actions);
+resultsEl.appendChild(card);
+})
+}
+
+
+function generate(){
+const feeling = feelingEl.value;
+const verses = mapping[feeling] || [];
+renderVerses(verses.slice(0,3));
+}
+
+
+generateBtn.addEventListener('click', generate);
+randomBtn.addEventListener('click', ()=>{
+const keys = Object.keys(mapping);
+const pick = keys[Math.floor(Math.random()*keys.length)];
+feelingEl.value = pick;
+generate();
+});
+
+
+copyBtn.addEventListener('click', async ()=>{
+const text = Array.from(document.querySelectorAll('.verse')).map(v=>v.querySelector('.ref').textContent + '\n' + v.querySelector('.text').textContent).join('\n\n');
+try{ await navigator.clipboard.writeText(text); alert('Copied to clipboard'); }catch(e){ alert('Could not copy — please allow clipboard access or copy manually.'); }
+});
+
+
+downloadBtn.addEventListener('click', ()=>{
+const text = Array.from(document.querySelectorAll('.verse')).map(v=>v.querySelector('.ref').textContent + '\n' + v.querySelector('.text').textContent).join('\n\n');
+const blob = new Blob([text],{type:'text/plain'});
+const url = URL.createObjectURL(blob);
+const a = document.createElement('a'); a.href=url; a.download='comforting-verses.txt'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+});
+
+
+// auto-generate initial
+generate();
+</script>
+</body>
+</html>
