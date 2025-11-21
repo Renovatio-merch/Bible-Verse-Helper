@@ -1,169 +1,96 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Bible Comforter — 3 Verses for How You Feel</title>
-  <style>
-    /* … your existing CSS … */
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <header>
-      <!-- header content -->
-    </header>
+<!DOCTYPE html>
+// 🔹 Each emotion has a list of verse references
+const verseMap = {
+anxiety: [
+"Philippians 4:6-7",
+"1 Peter 5:7",
+"Psalm 94:19",
+"John 14:27"
+],
+depression: [
+"Psalm 34:17-18",
+"Psalm 42:11",
+"Matthew 11:28-30",
+"Psalm 147:3"
+],
+fear: [
+"Isaiah 41:10",
+"Joshua 1:9",
+"Psalm 27:1",
+"2 Timothy 1:7"
+],
+loneliness: [
+"Deuteronomy 31:6",
+"Psalm 25:16",
+"John 14:18",
+"Psalm 139:7-10"
+],
+stress: [
+"Proverbs 3:5-6",
+"Psalm 55:22",
+"Matthew 6:34",
+"Psalm 23:1-3"
+],
+grief: [
+"Psalm 34:18",
+"Revelation 21:4",
+"John 16:22",
+"Psalm 147:3"
+]
+};
 
-    <div class="card" role="main">
-      <div class="controls">
-        <label class="small" for="feeling">Select a feeling:</label>
-        <select id="feeling" aria-label="Choose a feeling">
-          <option value="anxiety">Anxiety / Worry</option>
-          <option value="depression">Depression / Low</option>
-          <option value="loneliness">Loneliness</option>
-          <option value="fear">Fear</option>
-          <option value="grief">Grief / Loss</option>
-          <option value="temptation">Temptation</option>
-          <option value="anger">Anger / Bitterness</option>
-          <option value="doubt">Doubt / Unbelief</option>
-        </select>
 
-        <button id="generate">Generate 3 Verses</button>
-        <button id="random" class="ghost">Surprise me</button>
-        <div style="flex:1"></div>
-        <button id="download" class="ghost">Download as text</button>
-        <button id="copy" class="ghost">Copy all</button>
-      </div>
+async function fetchVerse(ref) {
+const url = `https://api.esv.org/v3/passage/text/?q=${encodeURIComponent(ref)}&include-passage-references=true&include-verse-numbers=false&include-footnotes=false`;
 
-      <div id="results" class="verses" aria-live="polite">
-        <!-- verses appear here -->
-      </div>
 
-      <footer>
-        Tip: you can edit the mapping inside the single HTML file to add translations or more feelings.
-      </footer>
-    </div>
-  </div>
+const response = await fetch(url, {
+headers: {
+Authorization: `Token ${39dc3c544ba7665d2d7351b3a0cec92177ee5eb0}`
+}
+});
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const mapping = {
-        anxiety: [
-          {ref:'Philippians 4:6–7', text:'Be careful for nothing; …'},
-          {ref:'Matthew 6:34', text:'Take therefore no thought …'},
-          {ref:'1 Peter 5:7', text:'Casting all your care upon him; for he careth for you.'}
-        ],
-        depression: [
-          {ref:'Psalm 34:18', text:'The LORD is nigh …'},
-          {ref:'Psalm 42:11', text:'Why art thou cast down, O my soul? …'},
-          {ref:'Isaiah 41:10', text:'Fear thou not; for I am with thee …'}
-        ],
-        loneliness: [
-          {ref:'Psalm 23:4', text:'Yea, though I walk through the valley of the shadow of death …'},
-          {ref:'Deuteronomy 31:6', text:'Be strong and of a good courage …'},
-          {ref:'Hebrews 13:5', text:'I will never leave thee, nor forsake thee.'}
-        ],
-        fear: [
-          {ref:'Isaiah 41:10', text:'Fear thou not; for I am with thee …'},
-          {ref:'2 Timothy 1:7', text:'For God hath not given us the spirit of fear; but of power, and of love, and of a sound mind.'},
-          {ref:'Psalm 27:1', text:'The LORD is my light and my salvation; whom shall I fear? …'}
-        ],
-        grief: [
-          {ref:'Matthew 5:4', text:'Blessed are they that mourn: for they shall be comforted.'},
-          {ref:'Revelation 21:4', text:'And God shall wipe away all tears from their eyes …'},
-          {ref:'Psalm 34:18', text:'The LORD is nigh unto them that are of a broken heart …'}
-        ],
-        temptation: [
-          {ref:'1 Corinthians 10:13', text:'There hath no temptation taken you but such as is common to man …'},
-          {ref:'James 1:12–15', text:'Blessed is the man that endureth temptation …'},
-          {ref:'Matthew 26:41', text:'Watch and pray, that ye enter not into temptation …'}
-        ],
-        anger: [
-          {ref:'Ephesians 4:26–27', text:'Be ye angry, and sin not: let not the sun go down upon your wrath …'},
-          {ref:'Proverbs 15:1', text:'A soft answer turneth away wrath …'},
-          {ref:'James 1:19–20', text:'Wherefore, my beloved brethren, let every man be swift to hear …'}
-        ],
-        doubt: [
-          {ref:'James 1:5–6', text:'If any of you lack wisdom, let him ask of God …'},
-          {ref:'Mark 9:24', text:'And straightway the father of the child cried out, and said with tears, Lord, I believe; help thou mine unbelief.'},
-          {ref:'Hebrews 11:1', text:'Now faith is the substance of things hoped for, the evidence of things not seen.'}
-        ]
-      };
 
-      const resultsEl = document.getElementById('results');
-      const feelingEl = document.getElementById('feeling');
-      const generateBtn = document.getElementById('generate');
-      const randomBtn = document.getElementById('random');
-      const copyBtn = document.getElementById('copy');
-      const downloadBtn = document.getElementById('download');
+const data = await response.json();
+return data.passages[0] || "Verse not found.";
+}
 
-      function renderVerses(list) {
-        resultsEl.innerHTML = '';
-        list.forEach(v => {
-          const card = document.createElement('div');
-          card.className = 'verse';
-          const ref = document.createElement('div');
-          ref.className = 'ref';
-          ref.textContent = v.ref;
-          const txt = document.createElement('div');
-          txt.className = 'text';
-          txt.textContent = v.text;
-          const actions = document.createElement('div');
-          actions.className = 'actions small';
-          const cbtn = document.createElement('button');
-          cbtn.className = 'pill';
-          cbtn.textContent = 'Copy';
-          cbtn.addEventListener('click', () => navigator.clipboard.writeText(v.ref + '\\n' + v.text));
-          actions.appendChild(cbtn);
-          card.appendChild(ref);
-          card.appendChild(txt);
-          card.appendChild(actions);
-          resultsEl.appendChild(card);
-        });
-      }
 
-      function generate() {
-        const feeling = feelingEl.value;
-        const verses = mapping[feeling] || [];
-        renderVerses(verses.slice(0, 3));
-      }
+function getRandomThree(list) {
+const shuffled = [...list].sort(() => Math.random() - 0.5);
+return shuffled.slice(0, 3);
+}
 
-      generateBtn.addEventListener('click', generate);
-      randomBtn.addEventListener('click', () => {
-        const keys = Object.keys(mapping);
-        const pick = keys[Math.floor(Math.random() * keys.length)];
-        feelingEl.value = pick;
-        generate();
-      });
-      copyBtn.addEventListener('click', async () => {
-        const text = Array.from(document.querySelectorAll('.verse'))
-          .map(v => v.querySelector('.ref').textContent + '\\n' + v.querySelector('.text').textContent)
-          .join('\\n\\n');
-        try {
-          await navigator.clipboard.writeText(text);
-          alert('Copied to clipboard');
-        } catch (e) {
-          alert('Could not copy — please allow clipboard access or copy manually.');
-        }
-      });
-      downloadBtn.addEventListener('click', () => {
-        const text = Array.from(document.querySelectorAll('.verse'))
-          .map(v => v.querySelector('.ref').textContent + '\\n' + v.querySelector('.text').textContent)
-          .join('\\n\\n');
-        const blob = new Blob([text], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'comforting-verses.txt';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-      });
 
-      // initial render
-      generate();
-    });
-  </script>
+document.getElementById("generate").addEventListener("click", async () => {
+const feeling = document.getElementById("feeling").value;
+const resultsDiv = document.getElementById("results");
+
+
+if (!feeling) {
+resultsDiv.innerHTML = "<p>Please select a feeling.</p>";
+return;
+}
+
+
+resultsDiv.innerHTML = "<p>Loading verses...</p>";
+
+
+const verseList = verseMap[feeling];
+const chosen = getRandomThree(verseList);
+
+
+let output = "";
+
+
+for (const ref of chosen) {
+const text = await fetchVerse(ref);
+output += `<div class='verse'><strong>${ref}</strong>\n${text}</div>`;
+}
+
+
+resultsDiv.innerHTML = output;
+});
+</script>
 </body>
 </html>
