@@ -1,87 +1,166 @@
-<!DOCTYPE html>
-"Psalm 34:17-18",
-"Psalm 42:11",
-"Matthew 11:28-30",
-"Psalm 147:3"
-],
-fear: [
-"Isaiah 41:10",
-"Joshua 1:9",
-"Psalm 27:1",
-"2 Timothy 1:7"
-],
-loneliness: [
-"Deuteronomy 31:6",
-"Psalm 25:16",
-"John 14:18",
-"Psalm 139:7-10"
-],
-stress: [
-"Proverbs 3:5-6",
-"Psalm 55:22",
-"Matthew 6:34",
-"Psalm 23:1-3"
-],
-grief: [
-"Psalm 34:18",
-"Revelation 21:4",
-"John 16:22",
-"Psalm 147:3"
-]
-};
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bible Comforter — 3 Verses for How You Feel</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#60a5fa;--muted:#94a3b8;--glass:rgba(255,255,255,0.04)}
+    *{box-sizing:border-box;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#071021 0%, #071827 60%);color:#e6eef8}
+    .wrap{max-width:900px;margin:28px auto;padding:20px}
+    header{display:flex;align-items:center;gap:16px}
+    h1{margin:0;font-size:1.4rem}
+    p.lead{margin:6px 0 18px;color:var(--muted)}
+    .card{background:var(--card);padding:16px;border-radius:12px;box-shadow:0 6px 18px rgba(2,6,23,0.6);}
+    .controls{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+    select,multi-select,input[type=search]{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:inherit}
+    button{background:var(--accent);border:none;color:#05203b;padding:10px 12px;border-radius:8px;cursor:pointer;font-weight:600}
+    button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+    .verses{margin-top:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+    .verse{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
+    .ref{font-weight:700;color:var(--accent);font-size:0.95rem}
+    .text{margin-top:8px;color:#dce8f9;font-size:0.92rem;line-height:1.35}
+    .small{font-size:0.86rem;color:var(--muted)}
+    footer{margin-top:18px;color:var(--muted);font-size:0.86rem}
+    .actions{display:flex;gap:8px;margin-top:10px}
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);cursor:pointer}
+    @media(max-width:520px){header{flex-direction:column;align-items:flex-start} .controls{flex-direction:column}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" aria-hidden><path d="M12 2v10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 10h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 21h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/></svg>
+      <div>
+        <h1>Bible Comforter</h1>
+        <p class="lead">Choose a feeling and get 3 Bible verses to encourage you. (KJV shown — public domain.)</p>
+      </div>
+    </header>
 
+    <div class="card" role="main">
+      <div class="controls">
+        <label class="small" for="feeling">Select a feeling:</label>
+        <select id="feeling" aria-label="Choose a feeling">
+          <option value="anxiety">Anxiety / Worry</option>
+          <option value="depression">Depression / Low</option>
+          <option value="loneliness">Loneliness</option>
+          <option value="fear">Fear</option>
+          <option value="grief">Grief / Loss</option>
+          <option value="temptation">Temptation</option>
+          <option value="anger">Anger / Bitterness</option>
+          <option value="doubt">Doubt / Unbelief</option>
+        </select>
 
-async function fetchVerse(ref) {
-const url = `https://api.esv.org/v3/passage/text/?q=${encodeURIComponent(ref)}&include-passage-references=true&include-verse-numbers=false&include-footnotes=false`;
+        <button id="generate">Generate 3 Verses</button>
+        <button id="random" class="ghost">Surprise me</button>
+        <div style="flex:1"></div>
+        <button id="download" class="ghost">Download as text</button>
+        <button id="copy" class="ghost">Copy all</button>
+      </div>
 
+      <div id="results" class="verses" aria-live="polite">
+        <!-- verses appear here -->
+      </div>
 
-const response = await fetch(url, {
-headers: {
-Authorization: `Token ${ESV_API_KEY}`
-}
-});
+    </div>
+  </div>
 
+  <script>
+    // Mapping of feelings to three KJV verses (public domain)
+    const mapping = {
+      anxiety: [
+        {ref: 'Philippians 4:6–7', text: 'Be careful for nothing; but in every thing by prayer and supplication with thanksgiving let your requests be made known unto God. And the peace of God, which passeth all understanding, shall keep your hearts and minds through Christ Jesus.'},
+        {ref: 'Matthew 6:34', text: 'Take therefore no thought for the morrow: for the morrow shall take thought for the things of itself. Sufficient unto the day is the evil thereof.'},
+        {ref: '1 Peter 5:7', text: 'Casting all your care upon him; for he careth for you.'}
+      ],
+      depression: [
+        {ref: 'Psalm 34:18', text: 'The LORD is nigh unto them that are of a broken heart; and saveth such as be of a contrite spirit.'},
+        {ref: 'Psalm 42:11', text: 'Why art thou cast down, O my soul? and why art thou disquieted within me? hope thou in God: for I shall yet praise him, who is the health of my countenance, and my God.'},
+        {ref: 'Isaiah 41:10', text: 'Fear thou not; for I am with thee: be not dismayed; for I am thy God: I will strengthen thee; yea, I will help thee; yea, I will uphold thee with the right hand of my righteousness.'}
+      ],
+      loneliness: [
+        {ref: 'Psalm 23:4', text: 'Yea, though I walk through the valley of the shadow of death, I will fear no evil: for thou art with me; thy rod and thy staff they comfort me.'},
+        {ref: 'Deuteronomy 31:6', text: 'Be strong and of a good courage, fear not, nor be afraid of them: for the LORD thy God, he it is that doth go with thee; he will not fail thee, nor forsake thee.'},
+        {ref: 'Hebrews 13:5', text: 'I will never leave thee, nor forsake thee.'}
+      ],
+      fear: [
+        {ref: 'Isaiah 41:10', text: 'Fear thou not; for I am with thee...'},
+        {ref: '2 Timothy 1:7', text: 'For God hath not given us the spirit of fear; but of power, and of love, and of a sound mind.'},
+        {ref: 'Psalm 27:1', text: 'The LORD is my light and my salvation; whom shall I fear? the LORD is the strength of my life; of whom shall I be afraid?'}
+      ],
+      grief: [
+        {ref: 'Matthew 5:4', text: 'Blessed are they that mourn: for they shall be comforted.'},
+        {ref: 'Revelation 21:4', text: 'And God shall wipe away all tears from their eyes; and there shall be no more death, neither sorrow, nor crying...'},
+        {ref: 'Psalm 34:18', text: 'The LORD is nigh unto them that are of a broken heart...'}
+      ],
+      temptation: [
+        {ref: '1 Corinthians 10:13', text: 'There hath no temptation taken you but such as is common to man: but God is faithful... he will with the temptation also make a way to escape, that ye may be able to bear it.'},
+        {ref: 'James 1:12–15', text: 'Blessed is the man that endureth temptation... But every man is tempted, when he is drawn away of his own lust...'},
+        {ref: 'Matthew 26:41', text: 'Watch and pray, that ye enter not into temptation: for the spirit indeed is willing, but the flesh is weak.'}
+      ],
+      anger: [
+        {ref: 'Ephesians 4:26–27', text: 'Be ye angry, and sin not: let not the sun go down upon your wrath, Neither give place to the devil.'},
+        {ref: 'Proverbs 15:1', text: 'A soft answer turneth away wrath: but grievous words stir up anger.'},
+        {ref: 'James 1:19–20', text: 'Wherefore, my beloved brethren, let every man be swift to hear, slow to speak, slow to wrath...'}
+      ],
+      doubt: [
+        {ref: 'James 1:5–6', text: 'If any of you lack wisdom, let him ask of God... But let him ask in faith, nothing wavering.'},
+        {ref: 'Mark 9:24', text: 'And straightway the father of the child cried out, and said with tears, Lord, I believe; help thou mine unbelief.'},
+        {ref: 'Hebrews 11:1', text: 'Now faith is the substance of things hoped for, the evidence of things not seen.'}
+      ]
+    };
 
-const data = await response.json();
-return data.passages[0] || "Verse not found.";
-}
+    const resultsEl = document.getElementById('results');
+    const feelingEl = document.getElementById('feeling');
+    const generateBtn = document.getElementById('generate');
+    const randomBtn = document.getElementById('random');
+    const copyBtn = document.getElementById('copy');
+    const downloadBtn = document.getElementById('download');
 
+    function renderVerses(list){
+      resultsEl.innerHTML = '';
+      list.forEach(v => {
+        const card = document.createElement('div'); card.className='verse';
+        const ref = document.createElement('div'); ref.className='ref'; ref.textContent = v.ref;
+        const txt = document.createElement('div'); txt.className='text'; txt.textContent = v.text;
+        const actions = document.createElement('div'); actions.className='actions small';
+        const cbtn = document.createElement('button'); cbtn.className='pill'; cbtn.textContent='Copy';
+        cbtn.addEventListener('click', ()=> navigator.clipboard.writeText(v.ref + '\n' + v.text));
+        actions.appendChild(cbtn);
+        card.appendChild(ref); card.appendChild(txt); card.appendChild(actions);
+        resultsEl.appendChild(card);
+      })
+    }
 
-function getRandomThree(list) {
-const shuffled = [...list].sort(() => Math.random() - 0.5);
-return shuffled.slice(0, 3);
-}
+    function generate(){
+      const feeling = feelingEl.value;
+      const verses = mapping[feeling] || [];
+      renderVerses(verses.slice(0,3));
+    }
 
+    generateBtn.addEventListener('click', generate);
+    randomBtn.addEventListener('click', ()=>{
+      const keys = Object.keys(mapping);
+      const pick = keys[Math.floor(Math.random()*keys.length)];
+      feelingEl.value = pick;
+      generate();
+    });
 
-document.getElementById("generate").addEventListener("click", async () => {
-const feeling = document.getElementById("feeling").value;
-const resultsDiv = document.getElementById("results");
+    copyBtn.addEventListener('click', async ()=>{
+      const text = Array.from(document.querySelectorAll('.verse')).map(v=>v.querySelector('.ref').textContent + '\n' + v.querySelector('.text').textContent).join('\n\n');
+      try{ await navigator.clipboard.writeText(text); alert('Copied to clipboard'); }catch(e){ alert('Could not copy — please allow clipboard access or copy manually.'); }
+    });
 
+    downloadBtn.addEventListener('click', ()=>{
+      const text = Array.from(document.querySelectorAll('.verse')).map(v=>v.querySelector('.ref').textContent + '\n' + v.querySelector('.text').textContent).join('\n\n');
+      const blob = new Blob([text],{type:'text/plain'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download='comforting-verses.txt'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    });
 
-if (!feeling) {
-resultsDiv.innerHTML = "<p>Please select a feeling.</p>";
-return;
-}
-
-
-resultsDiv.innerHTML = "<p>Loading verses...</p>";
-
-
-const verseList = verseMap[feeling];
-const chosen = getRandomThree(verseList);
-
-
-let output = "";
-
-
-for (const ref of chosen) {
-const text = await fetchVerse(ref);
-output += `<div class='verse'><strong>${ref}</strong>\n${text}</div>`;
-}
-
-
-resultsDiv.innerHTML = output;
-});
-</script>
+    // auto-generate initial
+    generate();
+  </script>
 </body>
 </html>
