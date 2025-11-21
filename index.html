@@ -1,13 +1,4 @@
 <!DOCTYPE html>
-// 🔹 Each emotion has a list of verse references
-const verseMap = {
-anxiety: [
-"Philippians 4:6-7",
-"1 Peter 5:7",
-"Psalm 94:19",
-"John 14:27"
-],
-depression: [
 "Psalm 34:17-18",
 "Psalm 42:11",
 "Matthew 11:28-30",
@@ -46,7 +37,7 @@ const url = `https://api.esv.org/v3/passage/text/?q=${encodeURIComponent(ref)}&i
 
 const response = await fetch(url, {
 headers: {
-Authorization: `Token ${39dc3c544ba7665d2d7351b3a0cec92177ee5eb0}`
+Authorization: `Token ${ESV_API_KEY}`
 }
 });
 
